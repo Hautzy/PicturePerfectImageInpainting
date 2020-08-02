@@ -1,18 +1,48 @@
 import os
-
-from torch.utils.data import DataLoader
-
-import config as c
-import preprocessing as pp
-from pickle import dump, HIGHEST_PROTOCOL, load
+from pickle import dump, load
 
 import torch
+import dill as pkl
+import numpy as np
+import config as c
+import preprocessing as pp
+from crop_dataset import calculate_coordinates
 
-from crop_dataset import CropDataset, stack_cropped_pictures, calculate_coordinates
-from net import evaluate_model
+
+def mse(target_array, prediction_array, ind):
+    if prediction_array.shape != target_array.shape:
+        raise IndexError(
+            f"Target shape is {target_array.shape} but prediction shape is {prediction_array.shape}. Prediction {ind}")
+    prediction_array, target_array = np.asarray(prediction_array, np.float64), np.asarray(target_array, np.float64)
+    return np.mean((prediction_array - target_array) ** 2)
 
 
-def run_tests():
+def scoring(prediction_file: str, target_file: str):
+    with open(prediction_file, 'rb') as pfh:
+        predictions = pkl.load(pfh)
+    if not isinstance(predictions, list):
+        raise TypeError(f"Expected a list of numpy arrays as pickle file. "
+                        f"Got {type(predictions)} object in pickle file instead.")
+    if not all([isinstance(prediction, np.ndarray) and np.uint8 == prediction.dtype
+                for prediction in predictions]):
+        raise TypeError("List of predictions contains elements which are not numpy arrays of dtype uint8")
+
+    with open(target_file, 'rb') as tfh:
+        targets = pkl.load(tfh)
+    if len(targets) != len(predictions):
+        raise IndexError(f"list of targets has {len(targets)} elements "
+                         f"but list of submitted predictions has {len(predictions)} elements.")
+
+    mses = np.zeros(shape=len(predictions))
+    ind = 0
+    for target, prediction in zip(targets, predictions):
+        mses[ind] = mse(target, prediction, ind)
+        ind += 1
+
+    return np.mean(mses)
+
+
+def create_test_data():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     with open(c.TEST_FOLDER + os.sep + 'example_testset.pkl', 'rb') as f:
         test_set = load(f)

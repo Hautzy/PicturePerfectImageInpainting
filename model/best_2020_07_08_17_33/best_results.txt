@@ -1,0 +1,4 @@
+Scores:
+Test Loss: 16.0892
+Val Loss: 16.1812
+Train Loss: 16.0181

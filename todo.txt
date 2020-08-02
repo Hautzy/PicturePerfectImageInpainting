@@ -1,0 +1,3 @@
+scoring is stoll off!
+GAN instead of CNN
+try multiple workers for dataloader
