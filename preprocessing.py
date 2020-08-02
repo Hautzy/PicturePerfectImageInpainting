@@ -10,14 +10,14 @@ from crop_dataset import calculate_coordinates
 
 def scale_rotate_images():
     index = 0
-    raw_image_paths = c.get_file_paths(c.RAW_DATA_FOLDER)[:100000]
+    raw_image_paths = c.get_file_paths(c.RAW_DATA_FOLDER)[:100]
     print('### SCALE IMAGES ###')
     for image_path in raw_image_paths:
         image = Image.open(image_path)
         image.thumbnail((c.MAX_IMAGE_SIZE, c.MAX_IMAGE_SIZE), Image.ANTIALIAS)
         deg = 0
         for ind in range(c.NUMBER_OF_ROTATIONS):
-            if deg is not 0:
+            if deg != 0:
                 rotated_image = image.rotate(deg, fillcolor=0)
             else:
                 rotated_image = image

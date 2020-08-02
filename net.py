@@ -7,18 +7,19 @@ from torch.nn import Module, Conv2d
 
 
 def evaluate_model(model, data_loader, device):
-    mse = torch.nn.MSELoss()
-    loss = torch.tensor(0., device=device)
-    batch_num = 0
+    mses = np.zeros(shape=len(data_loader))
+    sample_num = 0
 
     with torch.no_grad():
         for X, y, meta in data_loader:
             X = X.to(device)
             y = y.to(device)
             outputs = model(X)
-            loss += mse(outputs, y)
-            batch_num += 1
-    return loss / batch_num
+            y = y.detach().cpu().numpy()
+            outputs = outputs.detach().cpu().numpy()
+            mses[sample_num] = np.mean((y[0] - outputs[0]) ** 2)
+            sample_num += 1
+    return np.mean(mses)
 
 
 def train():
@@ -27,7 +28,7 @@ def train():
     learning_rate = 1e-3
     weight_decay = 1e-5
 
-    run_validation_batch_num = 250
+    run_validation_batch_num = 1
     print_patch_num = 100
     n_epoch = 4
 

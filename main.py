@@ -16,5 +16,4 @@ import preprocessing as pp
 
 #net.train()
 #test.create_test_data()
-mse_loss = test.scoring(prediction_file='test/predictions.pk', target_file='test/example_targets.pkl')
-print(mse_loss)
+#print(test.scoring(prediction_file='test/predictions.pk', target_file='test/example_targets.pkl'))
