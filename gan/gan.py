@@ -2,7 +2,8 @@ import torch
 import config as c
 
 import numpy as np
-from crop_dataset import create_data_loader, calculate_coordinates
+from crop_dataset import create_data_loader
+from preprocessing import calculate_coordinates
 import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn

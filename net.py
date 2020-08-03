@@ -28,12 +28,12 @@ def train():
     learning_rate = 1e-3
     weight_decay = 1e-5
 
-    run_validation_batch_num = 10000
+    run_validation_batch_num = 200
     print_patch_num = 20
     n_epoch = 4
 
-    model = ConvNet(n_hidden_layers=10).to(device)
-    mse = nn.MSELoss()
+    model = ConvNet(n_hidden_layers=4).to(device)
+    mse = nn.MSELoss().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     test_loader, val_loader, train_loader, _, _, _ = data.create_data_loader()
@@ -43,6 +43,7 @@ def train():
     sample_count = 0
 
     for epoch in range(n_epoch):
+        total_batch_count = len(train_loader)
         for X, y, meta, _ in train_loader:
             X = X.to(device)
             y = y.to(device)
@@ -55,12 +56,13 @@ def train():
             sample_count += X.shape[0]
 
             if (batch_count + 1) % print_patch_num == 0:
-                print(f'Epoch[{epoch + 1}/{n_epoch}] Batch [{batch_count + 1}], Loss: {loss.item():.4f}')
+                print(f'Epoch[{epoch + 1}/{n_epoch}] Batch [{batch_count + 1}/{total_batch_count}], Loss: {loss.item():.4f}')
             if (batch_count + 1) % run_validation_batch_num == 0:
                 val_loss = evaluate_model(model, val_loader, device)
                 val_loss_nom = val_loss.item()
                 print(f'Validation set, Loss: {val_loss_nom:.4f}')
                 if val_loss_nom <= best_val_loss:
+                    print('Saving current model as best model!')
                     best_val_loss = val_loss_nom
                     torch.save(model, c.BEST_MODEL_FILE)
             batch_count += 1

@@ -12,6 +12,7 @@ all/
 pre_pro/
 raw_data/
 test/
+out/
 model.png
 
 # Distribution / packaging

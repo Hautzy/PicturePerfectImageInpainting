@@ -1,3 +1,6 @@
+# ************************************************** #
+# methods testing models on the given testing data
+# ************************************************** #
 import os
 from pickle import dump, load
 
@@ -6,9 +9,10 @@ import dill as pkl
 import numpy as np
 import config as c
 import preprocessing as pp
-from crop_dataset import calculate_coordinates
+from preprocessing import calculate_coordinates
 
 
+# calculate MSE from predicted cropped out sub-image and the correct test sub-image
 def mse(target_array, prediction_array, ind):
     if prediction_array.shape != target_array.shape:
         raise IndexError(
@@ -17,21 +21,12 @@ def mse(target_array, prediction_array, ind):
     return np.mean((prediction_array - target_array) ** 2)
 
 
+# create mean MSE for all test samples based on the prediction file and target file
 def scoring(prediction_file: str, target_file: str):
     with open(prediction_file, 'rb') as pfh:
         predictions = pkl.load(pfh)
-    if not isinstance(predictions, list):
-        raise TypeError(f"Expected a list of numpy arrays as pickle file. "
-                        f"Got {type(predictions)} object in pickle file instead.")
-    if not all([isinstance(prediction, np.ndarray) and np.uint8 == prediction.dtype
-                for prediction in predictions]):
-        raise TypeError("List of predictions contains elements which are not numpy arrays of dtype uint8")
-
     with open(target_file, 'rb') as tfh:
         targets = pkl.load(tfh)
-    if len(targets) != len(predictions):
-        raise IndexError(f"list of targets has {len(targets)} elements "
-                         f"but list of submitted predictions has {len(predictions)} elements.")
 
     mses = np.zeros(shape=len(predictions))
     ind = 0
@@ -42,6 +37,7 @@ def scoring(prediction_file: str, target_file: str):
     return np.mean(mses)
 
 
+# test best model over all given test data from test data pickle file and save results for later scoring
 def create_test_data():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     with open(c.TEST_FOLDER + os.sep + 'example_testset.pkl', 'rb') as f:
@@ -57,7 +53,7 @@ def create_test_data():
         crop_size = crop_sizes[ind]
         crop_center = crop_centers[ind]
         image = images[ind]
-        image_array, crop_array, target_array = pp.crop_from_image(image, crop_size, crop_center)
+        image_array, crop_array, target_array = pp.create_crop_from_single_image(image, crop_size, crop_center)
         X = torch.tensor(image_array)
         new_X = torch.zeros(size=(1, 1, c.MAX_IMAGE_SIZE, c.MAX_IMAGE_SIZE), device=device)
         ih, iw = image_array.shape

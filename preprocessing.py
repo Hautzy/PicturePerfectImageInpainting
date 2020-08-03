@@ -1,3 +1,7 @@
+# ************************************************** #
+# methods for preprocessing image data,
+# mainly for creating training data from raw images
+# ************************************************** #
 import os
 import torch
 import random
@@ -5,10 +9,12 @@ import numpy as np
 import config as c
 from PIL import Image
 from pickle import dump, HIGHEST_PROTOCOL, load
-from crop_dataset import calculate_coordinates
 
 
-def scale_rotate_images():
+# load all raw images
+# scale (scaling to match 100x100) and rotate every image (rotation is done several times)
+# save all processed images in prepro/images
+def scale_and_rotate_raw_images():
     index = 0
     raw_image_paths = c.get_file_paths(c.RAW_DATA_FOLDER)
     print('### SCALE IMAGES ###')
@@ -28,7 +34,10 @@ def scale_rotate_images():
             index += 1
 
 
-def crop_from_image(image_array, crop_size, crop_center):
+# crop sub-image from original image
+# based on crop_size and crop_center
+# return image with cropped out area filled with 0, map with 1 and 0, cropped out area with original content
+def create_crop_from_single_image(image_array, crop_size, crop_center):
     if not isinstance(image_array, np.ndarray) or len(image_array.shape) != 2:
         raise ValueError('No numpy 2d array')
     elif len(crop_size) != 2 or len(crop_center) != 2:
@@ -48,6 +57,7 @@ def crop_from_image(image_array, crop_size, crop_center):
     return image_array, crop_array, target_array
 
 
+# based on image height and image width calculate valid crop_size and crop_center
 def get_random_crop_size_and_center(image_height, image_width):
     valid_crop = False
     trys = 0
@@ -59,7 +69,7 @@ def get_random_crop_size_and_center(image_height, image_width):
         start_y = c.MIN_PADDING + int(crop_height / 2) + 1
         end_x = image_width - c.MIN_PADDING - int(crop_width / 2) - 1
         end_y = image_height - c.MIN_PADDING - int(crop_height / 2) - 1
-        valid_crop = end_y-start_y > 0 and end_x-start_x > 0
+        valid_crop = end_y - start_y > 0 and end_x - start_x > 0
         trys += 1
 
     if not valid_crop:
@@ -69,6 +79,9 @@ def get_random_crop_size_and_center(image_height, image_width):
     return (crop_height, crop_width), (center_y, center_x)
 
 
+# load pre-scaled and pre-rotated images from folder
+# create multiple random crop samples from these images
+# save every sample as pickle file to prepre/sample folder
 def create_train_samples():
     index = 0
     image_paths = c.get_file_paths(c.PREPRO_IMAGES_FOLDER)
@@ -80,7 +93,7 @@ def create_train_samples():
             crop_size, crop_center = get_random_crop_size_and_center(image_array.shape[0], image_array.shape[1])
             if crop_size is None or crop_center is None:
                 continue
-            image_array, crop_array, target_array = crop_from_image(image_array, crop_size, crop_center)
+            image_array, crop_array, target_array = create_crop_from_single_image(image_array, crop_size, crop_center)
 
             sample = {
                 'crop_size': crop_size,
@@ -95,3 +108,12 @@ def create_train_samples():
                 dump(sample, f, protocol=HIGHEST_PROTOCOL)
             print(f'>>> file "{file}" created')
             index += 1
+
+
+# calculate start and end x/y coordinates for crop sub-image based on crop_size and crop_center
+def calculate_coordinates(crop_size, crop_center):
+    st_x = int(crop_center[1] - (crop_size[1] - 1) / 2)
+    en_x = int(crop_center[1] + (crop_size[1] - 1) / 2) + 1
+    st_y = int(crop_center[0] - (crop_size[0] - 1) / 2)
+    en_y = int(crop_center[0] + (crop_size[0] - 1) / 2) + 1
+    return st_x, en_x, st_y, en_y

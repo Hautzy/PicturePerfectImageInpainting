@@ -15,7 +15,7 @@ import preprocessing as pp
 #pp.scale_rotate_images()
 #pp.create_train_samples()
 
-net.train()
+#net.train()
 #test.create_test_data()
 #print(test.scoring(prediction_file='test/predictions.pk', target_file='test/example_targets.pkl'))
 

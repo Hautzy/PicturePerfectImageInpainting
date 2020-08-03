@@ -1,7 +1,5 @@
-scoring is still off <-- FIXED
 GAN instead of CNN
-try multiple workers for dataloader <-- works but leads to the fact that you cannot longer debug
 
-
-GAN
----
+compare generated data with test data, there must be some differences?!?
+---> overwork creation of sample data there must be some issues!!!
+train, test and validation set are always the same?!? shuffel!!!

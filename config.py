@@ -1,9 +1,13 @@
+# ************************************************** #
+# basic utils and constants for configuration
+# ************************************************** #
 import os
 
 RAW_DATA_FOLDER = 'raw_data'
 PREPRO_FOLDER = 'pre_pro'
 MODEL_FOLDER = 'model'
 TEST_FOLDER = 'test'
+OUT_FOLDER = 'out'
 
 PREPRO_IMAGES_FOLDER = PREPRO_FOLDER + os.sep + 'images'
 SAMPLES_FOLDER = PREPRO_FOLDER + os.sep + 'samples'
@@ -34,6 +38,8 @@ def create_folders():
         os.mkdir(SAMPLES_FOLDER)
     if not os.path.exists(MODEL_FOLDER):
         os.mkdir(MODEL_FOLDER)
+    if not os.path.exists(OUT_FOLDER):
+        os.mkdir(OUT_FOLDER)
     print('>>> Created folder structure')
 
 
