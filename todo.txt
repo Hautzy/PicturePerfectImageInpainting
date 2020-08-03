@@ -1,3 +1,7 @@
-scoring is stoll off!
+scoring is still off <-- FIXED
 GAN instead of CNN
 try multiple workers for dataloader <-- works but leads to the fact that you cannot longer debug
+
+
+GAN
+---

@@ -11,6 +11,7 @@ def stack_cropped_pictures(batch_as_list):
                           c.MAX_IMAGE_SIZE, c.MAX_IMAGE_SIZE))
     y = torch.zeros(size=(batch_len, 1, c.MAX_IMAGE_SIZE, c.MAX_IMAGE_SIZE))
     meta = list()
+    targets = list()
     for ind in range(batch_len):
         crop_size = batch_as_list[ind]['crop_size']
         crop_center = batch_as_list[ind]['crop_center']
@@ -30,8 +31,9 @@ def stack_cropped_pictures(batch_as_list):
             'crop_size': crop_size,
             'crop_center': crop_center
         })
+        targets.append(target)
 
-    return X, y, meta
+    return X, y, meta, targets
 
 
 def calculate_coordinates(crop_size, crop_center):
@@ -58,29 +60,25 @@ def create_train_test(test_ratio=0.1, val_ratio=0.1):
 
 def create_data_loader():
     test_set, val_set, train_set = create_train_test()
+    test_batch_size = 1
+    val_batch_size = train_batch_size = 64
 
-    test_loader = DataLoader(test_set, shuffle=False, batch_size=1, num_workers=0, collate_fn=stack_cropped_pictures)
-    val_loader = DataLoader(val_set, shuffle=False, batch_size=128, num_workers=0, collate_fn=stack_cropped_pictures)
-    train_loader = DataLoader(train_set, shuffle=False, batch_size=32, num_workers=0, collate_fn=stack_cropped_pictures)
+    test_loader = DataLoader(test_set, shuffle=False, batch_size=test_batch_size, num_workers=0, collate_fn=stack_cropped_pictures)
+    val_loader = DataLoader(val_set, shuffle=False, batch_size=val_batch_size, num_workers=0, collate_fn=stack_cropped_pictures)
+    train_loader = DataLoader(train_set, shuffle=False, batch_size=train_batch_size, num_workers=0, collate_fn=stack_cropped_pictures)
 
-    return test_loader, val_loader, train_loader
+    return test_loader, val_loader, train_loader, test_batch_size, val_batch_size, train_batch_size
 
 
 class CropDataset(Dataset):
     def __init__(self, folder):
-        self.samples = list()
         self.sample_paths = c.get_file_paths(folder)
-        ind = 0
-        for sample_path in self.sample_paths:
-            with open(sample_path, 'rb') as f:
-                self.samples.append(load(f))
-                ind += 1
-            if ind % 1000 == 0:
-                print(f'>>> file {ind}/{len(self.sample_paths)} loaded')
+        print(f'>>> loaded {len(self.sample_paths)} sample paths')
 
     def __getitem__(self, index):
-        sample = self.samples[index]
-        return sample
+        with open(self.sample_paths[index], 'rb') as f:
+            return load(f)
+        raise FileNotFoundError()
 
     def __len__(self):
         return len(self.sample_paths)

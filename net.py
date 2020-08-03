@@ -11,7 +11,7 @@ def evaluate_model(model, data_loader, device):
     sample_num = 0
 
     with torch.no_grad():
-        for X, y, meta in data_loader:
+        for X, y, meta, _ in data_loader:
             X = X.to(device)
             y = y.to(device)
             outputs = model(X)
@@ -28,22 +28,22 @@ def train():
     learning_rate = 1e-3
     weight_decay = 1e-5
 
-    run_validation_batch_num = 1
-    print_patch_num = 100
+    run_validation_batch_num = 10000
+    print_patch_num = 20
     n_epoch = 4
 
-    model = ConvNet().to(device)
+    model = ConvNet(n_hidden_layers=10).to(device)
     mse = nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
-    test_loader, val_loader, train_loader = data.create_data_loader()
+    test_loader, val_loader, train_loader, _, _, _ = data.create_data_loader()
 
     batch_count = 0
     best_val_loss = np.inf
     sample_count = 0
 
     for epoch in range(n_epoch):
-        for X, y, meta in train_loader:
+        for X, y, meta, _ in train_loader:
             X = X.to(device)
             y = y.to(device)
 
@@ -57,7 +57,7 @@ def train():
             if (batch_count + 1) % print_patch_num == 0:
                 print(f'Epoch[{epoch + 1}/{n_epoch}] Batch [{batch_count + 1}], Loss: {loss.item():.4f}')
             if (batch_count + 1) % run_validation_batch_num == 0:
-                val_loss = evaluate_model(model, test_loader, device)
+                val_loss = evaluate_model(model, val_loader, device)
                 val_loss_nom = val_loss.item()
                 print(f'Validation set, Loss: {val_loss_nom:.4f}')
                 if val_loss_nom <= best_val_loss:
@@ -68,6 +68,11 @@ def train():
     test_loss = evaluate_model(model, test_loader, device)
     val_loss = evaluate_model(model, val_loader, device)
     train_loss = evaluate_model(model, train_loader, device)
+
+    val_loss_nom = val_loss.item()
+    print(f'Validation set, Loss: {val_loss_nom:.4f}')
+    if val_loss_nom <= best_val_loss:
+        torch.save(model, c.BEST_MODEL_FILE)
 
     with open(c.BEST_RESULTS_FILE, 'w') as fh:
         print(f"Scores:", file=fh)
