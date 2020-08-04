@@ -1,22 +1,17 @@
 import net
-import test
-from pickle import load, HIGHEST_PROTOCOL, dump
-
-import torch
-from torch import nn
-
 import config as c
-import numpy as np
-from gan import gan
-import crop_dataset as data
-import preprocessing as pp
+import utils.data_visualization_utils as dv
+import utils.preprocessing_utils as pp
 
-#c.create_folders()
-#pp.scale_rotate_images()
-#pp.create_train_samples()
+c.clear_folders()
+c.create_folders()
+pp.scale_and_rotate_raw_images()
+pp.create_train_samples()
 
-#net.train()
+#dv.test_set_info()
+
+net.train()
 #test.create_test_data()
 #print(test.scoring(prediction_file='test/predictions.pk', target_file='test/example_targets.pkl'))
-
 #gan.train()
+

@@ -2,6 +2,7 @@
 # basic utils and constants for configuration
 # ************************************************** #
 import os
+import shutil
 
 RAW_DATA_FOLDER = 'raw_data'
 PREPRO_FOLDER = 'pre_pro'
@@ -10,6 +11,7 @@ TEST_FOLDER = 'test'
 OUT_FOLDER = 'out'
 
 PREPRO_IMAGES_FOLDER = PREPRO_FOLDER + os.sep + 'images'
+PREPRO_IMAGE_NORMALIZER = PREPRO_FOLDER + os.sep + 'normalizer.pk'
 SAMPLES_FOLDER = PREPRO_FOLDER + os.sep + 'samples'
 SCALER_FILE = PREPRO_FOLDER + os.sep + 'scaler.pk'
 BEST_MODEL_FILE = MODEL_FOLDER + os.sep + 'best_model.pk'
@@ -25,8 +27,8 @@ MAX_CROP_SIZE = 21
 MIN_PADDING = 20
 
 CROPS_PER_PICTURE = 10
-NUMBER_OF_ROTATIONS = 8
-FIXED_ROTATION = 45
+NUMBER_OF_ROTATIONS = 1
+FIXED_ROTATION = 360
 
 
 def create_folders():
@@ -42,6 +44,11 @@ def create_folders():
         os.mkdir(OUT_FOLDER)
     print('>>> Created folder structure')
 
+def clear_folders():
+    if os.path.exists(PREPRO_FOLDER):
+        shutil.rmtree(PREPRO_FOLDER, ignore_errors=True)
+    if os.path.exists(OUT_FOLDER):
+        shutil.rmtree(OUT_FOLDER, ignore_errors=True)
 
 def get_file_paths(root_folder):
     paths = list()

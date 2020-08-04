@@ -16,7 +16,7 @@ from pickle import dump, HIGHEST_PROTOCOL, load
 # save all processed images in prepro/images
 def scale_and_rotate_raw_images():
     index = 0
-    raw_image_paths = c.get_file_paths(c.RAW_DATA_FOLDER)
+    raw_image_paths = c.get_file_paths(c.RAW_DATA_FOLDER)[:10]
     print('### SCALE IMAGES ###')
     for image_path in raw_image_paths:
         image = Image.open(image_path)
@@ -27,7 +27,7 @@ def scale_and_rotate_raw_images():
                 rotated_image = image.rotate(deg, fillcolor=0)
             else:
                 rotated_image = image
-            file = f'{c.PREPRO_IMAGES_FOLDER}/i{index}_r{deg}.jpg'
+            file = f'{c.PREPRO_IMAGES_FOLDER}/{index}.jpg'
             rotated_image.save(file)
             print(f'>>> file "{file}" created')
             deg += c.FIXED_ROTATION
@@ -50,9 +50,9 @@ def create_crop_from_single_image(image_array, crop_size, crop_center):
         raise ValueError('rectangle is < 20 pixels from borders')
 
     target_array = np.copy(image_array[st_y:en_y, st_x:en_x])
-    image_array[st_y:en_y, st_x:en_x] = 0
-    crop_array = np.zeros(shape=image_array.shape, dtype=image_array.dtype)
-    crop_array[st_y:en_y, st_x:en_x] = 1
+    image_array[st_y:en_y, st_x:en_x] = 1
+    crop_array = np.ones(shape=image_array.shape, dtype=image_array.dtype)
+    crop_array[st_y:en_y, st_x:en_x] = 255
 
     return image_array, crop_array, target_array
 

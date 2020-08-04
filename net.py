@@ -2,8 +2,7 @@ import torch
 import config as c
 from torch import nn
 import numpy as np
-import crop_dataset as data
-from torch.nn import Module, Conv2d
+from utils import data_loader_utils as data
 
 
 def evaluate_model(model, data_loader, device):
@@ -56,7 +55,7 @@ def train():
             sample_count += X.shape[0]
 
             if (batch_count + 1) % print_patch_num == 0:
-                print(f'Epoch[{epoch + 1}/{n_epoch}] Batch [{batch_count + 1}/{total_batch_count}], Loss: {loss.item():.4f}')
+                print(f'Epoch[{epoch + 1}/{n_epoch}] Batch [{batch_count + 1}/{total_batch_count}], Loss: {loss.item() * 255.0:.4f}')
             if (batch_count + 1) % run_validation_batch_num == 0:
                 val_loss = evaluate_model(model, val_loader, device)
                 val_loss_nom = val_loss.item()

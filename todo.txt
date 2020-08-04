@@ -3,3 +3,7 @@ GAN instead of CNN
 compare generated data with test data, there must be some differences?!?
 ---> overwork creation of sample data there must be some issues!!!
 train, test and validation set are always the same?!? shuffel!!!
+
+
+
+so resizing keeps the aspect ratio!

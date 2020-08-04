@@ -1,15 +1,13 @@
-import torch
 import config as c
 
 import numpy as np
-from crop_dataset import create_data_loader
-from preprocessing import calculate_coordinates
+from utils.preprocessing_utils import calculate_coordinates
 import matplotlib.pyplot as plt
 import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from crop_dataset import create_data_loader
+from utils.data_loader_utils import create_data_loader
 from gan.discriminator import Discriminator
 from gan.generator import Generator
 

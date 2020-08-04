@@ -8,8 +8,8 @@ import torch
 import dill as pkl
 import numpy as np
 import config as c
-import preprocessing as pp
-from preprocessing import calculate_coordinates
+from utils import preprocessing_utils as pp
+from utils.preprocessing_utils import calculate_coordinates
 
 
 # calculate MSE from predicted cropped out sub-image and the correct test sub-image
